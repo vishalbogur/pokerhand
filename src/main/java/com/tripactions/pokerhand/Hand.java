@@ -29,6 +29,7 @@ public class Hand {
 	 */
 	private String handValue;
 	
+	
 
 	/**
 	 * Creates a hand if a valid input is passed.
@@ -37,13 +38,13 @@ public class Hand {
 	 * @throws ApplicationException
 	 */
 	public static Hand fromString(String cardsInput) throws ApplicationException {
-		if(HandValidator.isEmptyOrNull(cardsInput)) {
+		if(HandValidator.isNotEmptyOrNull(cardsInput)) {
 			HandValidator.validateCardsInput(cardsInput);
 			cardsInput = cardsInput.toUpperCase();
-			String[] cardValues = cardsInput.split(" ");
+			String[] cardValues = cardsInput.split(ApplicationConstants.DELIMITER_SPACE);
 			return new Hand(Arrays.asList(cardValues));
 		}
-		throw new ApplicationException("Null or Empty input");
+		throw new ApplicationException(ApplicationConstants.ERROR_MESSAGE);
 	}
 
 
@@ -74,69 +75,79 @@ public class Hand {
 		cardsList = cardsList.stream().map(card -> Character.toString(card.charAt(0))).collect(Collectors.toList());
 
 		if (!suitsList.isEmpty()) {
-			 /*
-			 * This means all of the cards have same suit.
-			 * Possible values are:
-			 * Royal Flush
-			 * Straight flush
-			 * Flush
-			 */
-
-			if (cardsList.containsAll(Arrays.asList(ApplicationConstants.ROYAL_FLUSH_VALUES))) {
-				this.setHandValue(ApplicationConstants.ROYAL_FLUSH);
-			} else {
-				// straight flush or flush
-				if (checkIfTheCardsAreInSequence(cardsList)) {
-					this.setHandValue(ApplicationConstants.STRAIGHT_FLUSH);
-				} else {
-					this.setHandValue(ApplicationConstants.FLUSH);
-				}
-			}
-		} else {
-			// Determine possible other values
-			if (checkIfTheCardsAreInSequence(cardsList)) {
-				this.setHandValue(ApplicationConstants.STRAIGHT);
-			} else {
+			// FLUSH, ROYAL FLUSH, STRAIGHT FLUSH
+			 checkFlushCategory(cardsList);
+		} 
+		else if(checkIfTheCardsAreInSequence(cardsList)){
+			//STRAIGHT
+			this.setHandValue(ApplicationConstants.STRAIGHT);
+		}
+		else {
 				Collections.sort(cardsList);
 				String prevValue = null;
-				List<Integer> counters = new ArrayList<>();
+				List<Integer> similarCardCount = new ArrayList<>();
 				int valueCount = 0;
 				for (String s : cardsList) {
 					valueCount = Hand.count(this.cards.toString(), s);
-
+					// FOUR OF A KIND, 
 					if (valueCount == 4) {
 						this.setHandValue(ApplicationConstants.FOUR_OF_A_KIND);
 						return;
 					}
 					if (!s.equalsIgnoreCase(prevValue)) {
-						counters.add(1);
+						similarCardCount.add(1);
 					}
 					prevValue = s;
 
 				}
+				// FULL_HOUSE, TWO PAIR, ONE PAIR, HIGH CARD, THREE OF A KIND
+				checkIfPairsAndOthers(similarCardCount,valueCount);
+			}
+		
+	}
+	
 
-				switch (counters.size()) {
-				case 2:
-					this.setHandValue(ApplicationConstants.FULL_HOUSE);
-					break;
+	private void checkFlushCategory(List<String> cardsList) {
 
-				case 3:
-					if (valueCount == 3) {
-						this.setHandValue(ApplicationConstants.THREE_OF_A_KIND);
-					} else
-						this.setHandValue(ApplicationConstants.TWO_PAIR);
-					break;
-
-				case 4:
-					this.setHandValue(ApplicationConstants.ONE_PAIR);
-					break;
-
-				default:
-					this.setHandValue(ApplicationConstants.HIGH_CARD);
-				}
+		if (cardsList.containsAll(Arrays.asList(ApplicationConstants.ROYAL_FLUSH_VALUES))) {
+			this.setHandValue(ApplicationConstants.ROYAL_FLUSH);
+		} else {
+			// straight flush or flush
+			if (checkIfTheCardsAreInSequence(cardsList)) {
+				this.setHandValue(ApplicationConstants.STRAIGHT_FLUSH);
+			} else {
+				this.setHandValue(ApplicationConstants.FLUSH);
 			}
 		}
 	}
+
+
+	private void checkIfPairsAndOthers(List<Integer> similarCardCount, int vauleCount) {
+		switch (similarCardCount.size()) {
+		case 2:
+			this.setHandValue(ApplicationConstants.FULL_HOUSE);
+			break;
+
+		case 3:
+			if (vauleCount == 3) {
+				this.setHandValue(ApplicationConstants.THREE_OF_A_KIND);
+			}
+			else {
+				this.setHandValue(ApplicationConstants.TWO_PAIR);}
+			break;
+
+		case 4:
+			this.setHandValue(ApplicationConstants.ONE_PAIR);
+			break;
+
+		default:
+			this.setHandValue(ApplicationConstants.HIGH_CARD);
+		}
+	}
+
+
+	
+
 
 	/**
 	 * Checks if the hand has sequential values of cards. 
@@ -145,7 +156,7 @@ public class Hand {
 	 * @return true if the cards are in sequence otherwise false.
 	 */
 	private boolean checkIfTheCardsAreInSequence(List<String> cardsList) {
-
+		
 		List<String> cardValuesList = Arrays.asList(ApplicationConstants.VALUES);
 		int index = cardValuesList.indexOf(cardsList.get(0));
 		int count = 0;
@@ -161,6 +172,7 @@ public class Hand {
 		if (count == 5) {
 			return true;
 		}
+		
 		return false;
 	}
 

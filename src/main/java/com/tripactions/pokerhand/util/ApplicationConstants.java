@@ -20,6 +20,8 @@ public class ApplicationConstants {
 	public static final String SINGLE_QUOTE = "'";
 
 	public static final String COMMA = ",";
+	
+	public static final String DELIMITER_SPACE = " ";
 
 	public static final String HAND_STRING = "hand";
 	
@@ -42,6 +44,12 @@ public class ApplicationConstants {
 	public static final String STRAIGHT_FLUSH = "STRAIGHT_FLUSH";
 
 	public static final String ROYAL_FLUSH = "ROYAL_FLUSH";
+	
+	public static final String ERROR_MESSAGE = "Null or Empty input";
+	
+	public static final String VALIDATION_PATTERN = "((([2-9]|[Tt|Jj|Qq|Kk|Aa]){1}[Cc|Dd|Hh|Ss]{1})[ ]){5}";
+	
+	public static final String INVALID_INPUT = "Invalid input";
 	
 	public static final Map<String,Integer> VALUES_MAP = new HashMap<>();
 	
